@@ -63,8 +63,8 @@ def insert_data(amount, trans_type, category, payment_method, description):
     cursor.close()
 
 # --- HEADER & IDENTITAS ---
-st.title("💸 Pengelola Keuangan Organisasi")
-st.caption(f"Sistem Informasi Rekap Keuangan Real-Time | Developed by **{APP_AUTHOR}**")
+st.title("💸 Pengelola Keuangan SUSANTHAI")
+st.caption(f"Sistem Informasi Rekap Keuangan Real-Time | Developed by **{APP_AUTHOR}**| Griya Alam Sentul Blok C15 No26")
 
 # --- LOGIN SIMPEL (ROLE MANAGEMENT) ---
 st.sidebar.header("🔐 Akses Pengguna")
