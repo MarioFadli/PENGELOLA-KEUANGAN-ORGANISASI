@@ -16,8 +16,6 @@ st.set_page_config(
 APP_AUTHOR = "Mario Fadli"
 
 # --- KONEKSI DATABASE CLOUD ---
-# Masukkan URI Supabase milikmu di sini atau lewat Streamlit Secrets
-# UBAH BARIS 20 MENJADI SEPERTI INI:
 DATABASE_URL = "postgresql://postgres.lsmwcepfecddleswxhfl:10Mei2006%2310@aws-0-ap-south-1.pooler.supabase.com:5432/postgres"
 
 @st.cache_resource
@@ -64,7 +62,8 @@ def insert_data(amount, trans_type, category, payment_method, description):
 
 # --- HEADER & IDENTITAS ---
 st.title("💸 Pengelola Keuangan SUSANTHAI")
-st.caption(f"Sistem Informasi Rekap Keuangan Real-Time | Developed by **{APP_AUTHOR}**| Griya Alam Sentul Blok C15 No26")
+st.caption(f"Sistem Informasi Rekap Keuangan Real-Time | Developed by **{APP_AUTHOR}** | Griya Alam Sentul Blok C15 No26")
+st.caption(f"MANDALU|MARIO|DWIKA|INO|SATYA|BLACK|RAPUT|DONY|AYASH|AKMAL|FANG|ADO|HAIKAL|JOY|HAWARI")
 
 # --- LOGIN SIMPEL (ROLE MANAGEMENT) ---
 st.sidebar.header("🔐 Akses Pengguna")
@@ -91,7 +90,7 @@ st.divider()
 # --- TAB NAVIGASI ---
 tab_riwayat, tab_input, tab_grafik = st.tabs(["📜 Riwayat & Rekap", "➕ Input Transaksi", "📊 Grafik & Export"])
 
-# TAB 1: RIWAYAT
+# TAB 1: RIWAYAT & REKAP
 with tab_riwayat:
     st.subheader("Data Transaksi Organisasi")
     if not df.empty:
@@ -104,6 +103,33 @@ with tab_riwayat:
             st.dataframe(filtered_df, use_container_width=True)
         else:
             st.dataframe(df, use_container_width=True)
+
+        # --- FITUR HAPUS TRANSAKSI ---
+        st.divider()
+        if role == "Pengurus/Bendahara (Input Data)" and passkey == "1234":
+            st.subheader("🗑️ Hapus Transaksi")
+            
+            list_id = df['id'].tolist()
+            selected_id = st.selectbox("Pilih ID Transaksi yang ingin dihapus:", list_id)
+            
+            selected_row = df[df['id'] == selected_id].iloc[0]
+            st.caption(f"📌 Transaksi terpilih: **{selected_row['category']}** | Rp {selected_row['amount']:,.0f} | *{selected_row['description']}*")
+            
+            if st.button("🔴 Hapus Transaksi", type="primary"):
+                try:
+                    conn = get_connection()
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM transactions WHERE id = %s", (selected_id,))
+                    conn.commit()
+                    cursor.close()
+                    
+                    st.success(f"Transaksi dengan ID {selected_id} berhasil dihapus!")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Gagal menghapus data: {e}")
+        else:
+            st.info("🔒 Masukkan PIN Bendahara di sidebar untuk mengakses fitur hapus transaksi.")
+
     else:
         st.info("Belum ada data transaksi tersimpan.")
 
@@ -111,7 +137,6 @@ with tab_riwayat:
 with tab_input:
     st.subheader("Form Input Transaksi Baru")
     
-    # Ganti "1234" dengan PIN yang kamu inginkan
     if role == "Pengurus/Bendahara (Input Data)" and passkey == "1234":
         with st.form("form_transaksi", clear_on_submit=True):
             col_a, col_b = st.columns(2)
@@ -152,7 +177,6 @@ with tab_grafik:
         st.divider()
         st.subheader("📥 Export Laporan")
         
-        # Export Excel
         output_excel = io.BytesIO()
         with pd.ExcelWriter(output_excel, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Keuangan')
